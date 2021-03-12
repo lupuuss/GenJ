@@ -58,7 +58,7 @@ public class GenerateObservableAction extends AnAction {
         List<PsiElement> toAdd = new ArrayList<>();
 
         toAdd.add(createListenerInterface(elementFactory, eventName));
-        toAdd.add(createListenerField(elementFactory, project));
+        toAdd.add(createListenerField(elementFactory, file));
 
         if (dialog.generateAddMethod()) {
             toAdd.add(createListenerMethod(true, psiClass, elementFactory, eventName));
@@ -132,11 +132,17 @@ public class GenerateObservableAction extends AnAction {
                 GlobalSearchScope.everythingScope(file.getProject())
         );
 
-        if (listClass == null) {
+        PsiClass arrayListClass = facade.findClass(
+                "java.util.ArrayList",
+                GlobalSearchScope.everythingScope(file.getProject())
+        );
+
+        if (listClass == null || arrayListClass == null) {
             return;
         }
 
         file.importClass(listClass);
+        file.importClass(arrayListClass);
     }
 
     private PsiClass createListenerInterface(@NotNull PsiElementFactory elementFactory, @NotNull String actionName) {
@@ -150,11 +156,12 @@ public class GenerateObservableAction extends AnAction {
 
     private @NotNull PsiField createListenerField(
             @NotNull PsiElementFactory elementFactory,
-            @NotNull Project project
+            @NotNull PsiJavaFile file
     ) {
 
-        return elementFactory.createField("listeners",
-                PsiType.getTypeByName("List<Listener>", project, GlobalSearchScope.allScope(project))
+        return elementFactory.createFieldFromText(
+                "private List<Listener> listeners = new ArrayList<>();",
+                file
         );
     }
 }
