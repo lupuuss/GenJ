@@ -12,6 +12,6 @@
     </extensions>
 
     <actions>
-        <action id="GenerateObservable" class="pl.lodz.zzpj.genj.GenerateObservableAction" text="Generate Observable"/>
+        <action id="GenerateObservable" class="pl.lodz.zzpj.genj.observable.GenerateObservableAction" text="Generate Observable"/>
     </actions>
 </idea-plugin>

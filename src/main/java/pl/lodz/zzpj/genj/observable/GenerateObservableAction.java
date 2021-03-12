@@ -1,4 +1,4 @@
-package pl.lodz.zzpj.genj;
+package pl.lodz.zzpj.genj.observable;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
