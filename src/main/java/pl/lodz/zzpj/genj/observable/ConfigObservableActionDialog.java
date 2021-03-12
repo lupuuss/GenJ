@@ -1,6 +1,7 @@
 package pl.lodz.zzpj.genj.observable;
 
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -41,6 +42,26 @@ public class ConfigObservableActionDialog extends DialogWrapper {
         dialogPanel.add(removeCheck);
 
         return dialogPanel;
+    }
+
+    @Override
+    public @Nullable JComponent getPreferredFocusedComponent() {
+        return textField;
+    }
+
+    @Override
+    protected @Nullable ValidationInfo doValidate() {
+
+        boolean isJavaIdentifier = textField
+                .getText()
+                .chars()
+                .allMatch(Character::isJavaIdentifierPart);
+
+        if (!isJavaIdentifier) {
+            return new ValidationInfo("Invalid name", textField);
+        }
+
+        return null;
     }
 
     public String getEventName() {
