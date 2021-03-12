@@ -41,12 +41,7 @@ public class GenerateObservableAction extends AnAction {
             return;
         }
 
-        PsiClass[] classes = file.getClasses();
-
-        Optional<PsiClass> psiClassOpt = Arrays.stream(classes)
-                .filter(psiCls -> psiCls.getModifierList() != null)
-                .filter((psiCls -> psiCls.getModifierList().hasModifierProperty(PsiModifier.PUBLIC)))
-                .findFirst();
+        Optional<PsiClass> psiClassOpt = findPublicClassFromCurrentFile(file);
 
         if (psiClassOpt.isEmpty()) {
             return;
@@ -54,22 +49,22 @@ public class GenerateObservableAction extends AnAction {
 
         PsiClass psiClass = psiClassOpt.get();
 
+        String actionName = "Event";
+
         PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(project);
         JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
 
-        String actionName = "Event";
+        List<PsiElement> toAdd = Arrays.asList(
+                createListenerInterface(elementFactory, actionName),
+                createListenerField(elementFactory, project),
+                createListenerMethod(true, psiClass, elementFactory, actionName),
+                createListenerMethod(false, psiClass, elementFactory, actionName)
+        );
 
         // required to add any text to intelli
         WriteCommandAction.runWriteCommandAction(project, () -> {
 
             addImportsIfRequired(file, facade);
-
-            List<PsiElement> toAdd = Arrays.asList(
-                    createListenerInterface(elementFactory, actionName),
-                    createListenerField(elementFactory, project),
-                    createListenerMethod(true, psiClass, elementFactory, actionName),
-                    createListenerMethod(false, psiClass, elementFactory, actionName)
-            );
 
             PsiElement first = Arrays.stream(psiClass.getChildren())
                     .filter(cls -> cls.textContains('{'))
@@ -82,11 +77,20 @@ public class GenerateObservableAction extends AnAction {
         });
     }
 
+    private Optional<PsiClass> findPublicClassFromCurrentFile(@NotNull PsiJavaFile file) {
+        PsiClass[] classes = file.getClasses();
+
+        return Arrays.stream(classes)
+                .filter(psiCls -> psiCls.getModifierList() != null)
+                .filter((psiCls -> psiCls.getModifierList().hasModifierProperty(PsiModifier.PUBLIC)))
+                .findFirst();
+    }
+
     private PsiMethod createListenerMethod(
             boolean isAdd,
-            PsiClass psiClass,
-            PsiElementFactory elementFactory,
-            String actionName
+            @NotNull PsiClass psiClass,
+            @NotNull PsiElementFactory elementFactory,
+            @NotNull String actionName
     ) {
 
         StringBuilder methodSignature = new StringBuilder();
@@ -107,7 +111,7 @@ public class GenerateObservableAction extends AnAction {
         return elementFactory.createMethodFromText(methodSignature.toString(), psiClass);
     }
 
-    private void addImportsIfRequired(PsiJavaFile file, JavaPsiFacade facade) {
+    private void addImportsIfRequired(@NotNull PsiJavaFile file, @NotNull JavaPsiFacade facade) {
         PsiClass listClass = facade.findClass(
                 "java.util.List",
                 GlobalSearchScope.everythingScope(file.getProject())
@@ -120,7 +124,7 @@ public class GenerateObservableAction extends AnAction {
         file.importClass(listClass);
     }
 
-    private PsiClass createListenerInterface(@NotNull PsiElementFactory elementFactory, String actionName) {
+    private PsiClass createListenerInterface(@NotNull PsiElementFactory elementFactory, @NotNull String actionName) {
 
         PsiClass listenerInterface = elementFactory.createInterface("Listener");
 
