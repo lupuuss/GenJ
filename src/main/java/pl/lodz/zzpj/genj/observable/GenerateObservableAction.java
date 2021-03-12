@@ -9,17 +9,12 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class GenerateObservableAction extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-
-
 
         PsiFile file = e.getDataContext().getData(CommonDataKeys.PSI_FILE);
 
@@ -49,17 +44,29 @@ public class GenerateObservableAction extends AnAction {
 
         PsiClass psiClass = psiClassOpt.get();
 
-        String actionName = "Event";
+        ConfigObservableActionDialog dialog = new ConfigObservableActionDialog();
+
+        if (!dialog.showAndGet()) {
+            return;
+        }
+
+        String eventName = dialog.getEventName();
 
         PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(project);
         JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
 
-        List<PsiElement> toAdd = Arrays.asList(
-                createListenerInterface(elementFactory, actionName),
-                createListenerField(elementFactory, project),
-                createListenerMethod(true, psiClass, elementFactory, actionName),
-                createListenerMethod(false, psiClass, elementFactory, actionName)
-        );
+        List<PsiElement> toAdd = new ArrayList<>();
+
+        toAdd.add(createListenerInterface(elementFactory, eventName));
+        toAdd.add(createListenerField(elementFactory, project));
+
+        if (dialog.generateAddMethod()) {
+            toAdd.add(createListenerMethod(true, psiClass, elementFactory, eventName));
+        }
+
+        if (dialog.generateRemoveMethod()) {
+            toAdd.add(createListenerMethod(false, psiClass, elementFactory, eventName));
+        }
 
         // required to add any text to intelli
         WriteCommandAction.runWriteCommandAction(project, () -> {
