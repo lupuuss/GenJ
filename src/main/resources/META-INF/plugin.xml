@@ -12,6 +12,11 @@
     </extensions>
 
     <actions>
-        <action id="GenerateObservable" class="pl.lodz.zzpj.genj.observable.GenerateObservableAction" text="Generate Observable"/>
+        <action
+                id="GenerateObservable"
+                class="pl.lodz.zzpj.genj.observable.GenerateObservableAction"
+                text="Observable">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>
