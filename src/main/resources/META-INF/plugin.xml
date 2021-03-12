@@ -1,0 +1,17 @@
+<idea-plugin>
+    <id>pl.lodz.zzpj.genj</id>
+    <name>GenJ</name>
+    <vendor email="224250@edu.p.lodz.pl">Politechnika Lodzka</vendor>
+
+    <description><![CDATA[Generating useful snippets for Java! Provided snippets: observable pattern.]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+
+    <actions>
+        <action id="GenerateObservable" class="pl.lodz.zzpj.genj.GenerateObservableAction" text="Generate Observable"/>
+    </actions>
+</idea-plugin>
