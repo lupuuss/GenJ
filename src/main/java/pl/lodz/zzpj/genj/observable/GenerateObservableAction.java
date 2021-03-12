@@ -113,7 +113,15 @@ public class GenerateObservableAction extends AnAction {
         methodSignature
                 .append("On")
                 .append(actionName)
-                .append("(Listener listener) {\nlisteners.add(listener);\n}");
+                .append("Listener(Listener listener) {\nlisteners.");
+
+        if (isAdd) {
+            methodSignature.append("add");
+        } else {
+            methodSignature.append("remove");
+        }
+
+        methodSignature.append("(listener);\n}");
 
         return elementFactory.createMethodFromText(methodSignature.toString(), psiClass);
     }
