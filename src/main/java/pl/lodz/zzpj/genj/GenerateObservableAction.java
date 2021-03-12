@@ -10,6 +10,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class GenerateObservableAction extends AnAction {
@@ -57,29 +59,26 @@ public class GenerateObservableAction extends AnAction {
 
         String actionName = "Event";
 
+        // required to add any text to intelli
         WriteCommandAction.runWriteCommandAction(project, () -> {
 
             addImportsIfRequired(file, facade);
 
-            PsiClass listenerInterface = createListenerInterface(elementFactory, actionName);
-            PsiField listenerField = createListenerField(elementFactory, project);
-            PsiMethod addMethod = createListenerMethod(true, psiClass, elementFactory, actionName);
-            PsiMethod removeMethod = createListenerMethod(false, psiClass, elementFactory, actionName);
+            List<PsiElement> toAdd = Arrays.asList(
+                    createListenerInterface(elementFactory, actionName),
+                    createListenerField(elementFactory, project),
+                    createListenerMethod(true, psiClass, elementFactory, actionName),
+                    createListenerMethod(false, psiClass, elementFactory, actionName)
+            );
 
             PsiElement first = Arrays.stream(psiClass.getChildren())
                     .filter(cls -> cls.textContains('{'))
                     .findFirst()
-                    .orElse(null);
+                    .orElseThrow();
 
-            if (first == null) {
-                psiClass.addRange(listenerInterface, listenerField);
-                return;
-            }
-
-            psiClass.addAfter(removeMethod, first);
-            psiClass.addAfter(addMethod, first);
-            psiClass.addAfter(listenerField, first);
-            psiClass.addAfter(listenerInterface, first);
+            // reverse provides proper order when adding after first element
+            Collections.reverse(toAdd);
+            toAdd.forEach(element -> psiClass.addAfter(element, first));
         });
     }
 
