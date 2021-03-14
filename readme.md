@@ -1,6 +1,6 @@
 # GenJ 
 
-## InteliJ plugin for Java
+## IntelliJ plugin for Java
 
 ## Contributors
 
