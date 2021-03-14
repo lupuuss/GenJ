@@ -1,5 +1,6 @@
 # GenJ 
-## InteliJ plugin for kotlin 
+
+## InteliJ plugin for Java
 
 ## Contributors
 
